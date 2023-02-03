@@ -6,6 +6,7 @@ import ru.javawebinar.topjava.repository.InMemoryMealRepository;
 import ru.javawebinar.topjava.repository.MealRepository;
 import ru.javawebinar.topjava.util.MealsUtil;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -18,13 +19,18 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public class MealServlet extends HttpServlet {
     private static final Logger log = getLogger(MealServlet.class);
-    private final MealRepository mealRepository = new InMemoryMealRepository();
+    private static final String MEALS_LIST_JSP = "mealsList.jsp";       // Path to page with list of meals
+    private static final String EDIT_MEAL_JSP = "editMeal.jsp";         // Path to edit meal page
+    private MealRepository mealRepository;
+
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+        mealRepository = new InMemoryMealRepository();
+    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String MEALS_LIST_JSP = "mealsList.jsp";       // Path to page with list of meals
-        String EDIT_MEAL_JSP = "editMeal.jsp";         // Path to edit meal page
-
         String action = request.getParameter("action");
         action = action == null ? "" : action;
         Meal meal;
