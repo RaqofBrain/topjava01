@@ -2,8 +2,8 @@ package ru.javawebinar.topjava.web;
 
 import org.slf4j.Logger;
 import ru.javawebinar.topjava.model.Meal;
+import ru.javawebinar.topjava.repository.InMemoryMealRepository;
 import ru.javawebinar.topjava.repository.MealRepository;
-import ru.javawebinar.topjava.repository.MealRepositoryImpl;
 import ru.javawebinar.topjava.util.MealsUtil;
 
 import javax.servlet.ServletException;
@@ -17,38 +17,43 @@ import java.time.LocalTime;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class MealServlet extends HttpServlet {
-    private final MealRepository mealRepository = new MealRepositoryImpl();
     private static final Logger log = getLogger(MealServlet.class);
+    private final MealRepository mealRepository = new InMemoryMealRepository();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.setContentType("text/html;charset=utf-8");
+        String MEALS_LIST_JSP = "mealsList.jsp";       // Path to page with list of meals
+        String EDIT_MEAL_JSP = "editMeal.jsp";         // Path to edit meal page
+
         String action = request.getParameter("action");
-
-        if (action == null) {
-            log.debug("getAllMeals");
-            request.setAttribute("meals",
-                    MealsUtil.getFilteredMealToList(mealRepository.getAll(), LocalTime.MIN, LocalTime.MAX, 2000));
-
-            request.getRequestDispatcher("mealsList.jsp").forward(request, response);
-        }
-        else if (action.equalsIgnoreCase("delete")) {
-            int id = getIdFromQuery(request);
-            mealRepository.delete(id);
-            response.sendRedirect("meals");
-        }
-        else if (action.equalsIgnoreCase("create")) {
-            Meal meal = new Meal(LocalDateTime.now(), "", 500);
-            request.setAttribute("meal", meal);
-            request.getRequestDispatcher("editMeal.jsp").forward(request, response);
-        }
-        else if (action.equalsIgnoreCase("update")) {
-            Meal meal = mealRepository.getById(getIdFromQuery(request));
-            request.setAttribute("meal", meal);
-            request.getRequestDispatcher("editMeal.jsp").forward(request, response);
-        }
-        else {
-            response.sendRedirect("meals");
+        action = action == null ? "" : action;
+        Meal meal;
+        switch (action.toLowerCase()) {
+            case "delete":
+                log.info("Action: {}", action);
+                int id = getIdFromQuery(request);
+                mealRepository.delete(id);
+                log.info("Deleted meal id: {}", id);
+                response.sendRedirect("meals");
+                log.info("Redirecting to meals list page");
+                break;
+            case "create":
+                log.info("Action: {}", action);
+                meal = new Meal(LocalDateTime.now(), "", 500);
+                request.setAttribute("meal", meal);
+                request.getRequestDispatcher(EDIT_MEAL_JSP).forward(request, response);
+                break;
+            case "update":
+                log.info("Action: {}", action);
+                meal = mealRepository.getById(getIdFromQuery(request));
+                request.setAttribute("meal", meal);
+                request.getRequestDispatcher(EDIT_MEAL_JSP).forward(request, response);
+                break;
+            default:
+                log.info("Action: getMealsList");
+                request.setAttribute("meals",
+                        MealsUtil.getFilteredMealToList(mealRepository.getAll(), LocalTime.MIN, LocalTime.MAX, MealsUtil.CALORIES_THRESHOLD));
+                request.getRequestDispatcher(MEALS_LIST_JSP).forward(request, response);
         }
     }
 
@@ -64,8 +69,9 @@ public class MealServlet extends HttpServlet {
 
         Meal meal = new Meal(intId, dateTime, description, calories);
         mealRepository.save(meal);
-
+        log.info("Saving meal: {}", meal);
         response.sendRedirect("meals");
+        log.info("Redirect to mealsList");
     }
 
     private int getIdFromQuery(HttpServletRequest request) {
