@@ -1,0 +1,11 @@
+table {
+    border: 1px solid black;
+    width: 35%;
+}
+th, td {
+    padding: 7px;
+    text-align: left;
+}
+tr:hover {
+    background-color: aqua;
+}
