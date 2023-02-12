@@ -34,7 +34,7 @@ public class InMemoryMealRepository implements MealRepository {
     @Override
     public Meal save(Meal meal, int userId) {
         log.info("Saving: {} for user: {}", meal, userId);
-        repository.putIfAbsent(userId, new ConcurrentHashMap<>());
+        repository.computeIfAbsent(userId, map -> new ConcurrentHashMap<>());
         if (meal.isNew()) {
             meal.setId(counter.incrementAndGet());
             repository.get(userId).put(meal.getId(), meal);
@@ -77,7 +77,9 @@ public class InMemoryMealRepository implements MealRepository {
 
     private List<Meal> sortByDateAndTime(Collection<Meal> meals) {
         return meals.stream()
-                .sorted(Comparator.comparing(Meal::getDate).thenComparing(Meal::getTime).reversed())
+                .sorted(Comparator.comparing(Meal::getDate)
+                        .thenComparing(Meal::getTime)
+                        .reversed())
                 .collect(Collectors.toList());
     }
 }
