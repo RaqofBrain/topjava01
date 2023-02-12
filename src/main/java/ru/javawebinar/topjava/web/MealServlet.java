@@ -12,7 +12,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
@@ -63,6 +65,21 @@ public class MealServlet extends HttpServlet {
                 log.info("Delete id={}", id);
                 mealRestController.delete(id);
                 response.sendRedirect("meals");
+                break;
+            case "filter":
+                log.info("get filtered list");
+                String startDate = request.getParameter("startDate");
+                String endDate = request.getParameter("endDate");
+                String startTime = request.getParameter("startTime");
+                String endTime = request.getParameter("endTime");
+
+                request.setAttribute("meals", mealRestController.getFilteredList(
+                        startDate.isEmpty() ? LocalDate.MIN : LocalDate.parse(startDate),
+                        endDate.isEmpty() ? LocalDate.MAX : LocalDate.parse(endDate).plus(1, ChronoUnit.DAYS),
+                        startTime.isEmpty() ? LocalTime.MIN : LocalTime.parse(startTime),
+                        endTime.isEmpty() ? LocalTime.MAX : LocalTime.parse(endTime)
+                ));
+                request.getRequestDispatcher("/meals.jsp").forward(request, response);
                 break;
             case "create":
             case "update":
