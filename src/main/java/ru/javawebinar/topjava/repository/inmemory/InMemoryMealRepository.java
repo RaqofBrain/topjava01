@@ -3,6 +3,7 @@ package ru.javawebinar.topjava.repository.inmemory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
 import ru.javawebinar.topjava.util.DateTimeUtil;
@@ -11,11 +12,14 @@ import ru.javawebinar.topjava.util.MealsUtil;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 @Repository
@@ -62,23 +66,21 @@ public class InMemoryMealRepository implements MealRepository {
     @Override
     public List<Meal> getAll(int userId) {
         log.info("Get all for user: {}", userId);
-        Map<Integer, Meal> userMealsMap = repository.get(userId);
-        if (userMealsMap == null) return Collections.emptyList();
-        return sortByDateAndTime(userMealsMap.values()).collect(Collectors.toList());
+        return getAllFiltered(userId, meal -> true);
     }
 
     @Override
     public List<Meal> getFilteredList(int userId, LocalDate startDate, LocalDate endDate) {
         log.info("Get filtered list");
-        Map<Integer, Meal> userMealsMap = repository.get(userId);
-        if (userMealsMap == null) return Collections.emptyList();
-        return sortByDateAndTime(userMealsMap.values())
-                .filter(meal -> DateTimeUtil.isBetweenHalfOpen(meal.getDate(), startDate, endDate))
-                .collect(Collectors.toList());
+        return getAllFiltered(userId, meal -> DateTimeUtil.isBetweenHalfOpen(meal.getDate(), startDate, endDate));
     }
 
-    private Stream<Meal> sortByDateAndTime(Collection<Meal> meals) {
-        return meals.stream()
-                .sorted(Comparator.comparing(Meal::getDateTime).reversed());
+    private List<Meal> getAllFiltered(int userId, Predicate<Meal> filter) {
+        Map<Integer, Meal> meals = repository.get(userId);
+        return CollectionUtils.isEmpty(meals) ? Collections.emptyList() :
+                meals.values().stream()
+                        .filter(filter)
+                        .sorted(Comparator.comparing(Meal::getDateTime).reversed())
+                        .collect(Collectors.toList());
     }
 }
