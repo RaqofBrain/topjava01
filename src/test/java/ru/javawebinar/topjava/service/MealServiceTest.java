@@ -35,23 +35,26 @@ import static ru.javawebinar.topjava.UserTestData.USER_ID;
 public class MealServiceTest {
     private static final Logger log = LoggerFactory.getLogger(MealServiceTest.class);
     private static final StringBuilder testSummary = new StringBuilder();
+
     @Rule
     public final Stopwatch stopwatch = new Stopwatch() {
+
         @Override
         protected void finished(long nanos, Description description) {
             String testName = description.getMethodName();
-            String testRunTime = String.format("%-30s %s ms", testName + ":", TimeUnit.NANOSECONDS.toMillis(nanos));
+            String testRunTime = String.format("%-30s %s ms", testName, TimeUnit.NANOSECONDS.toMillis(nanos));
             testSummary.append(testRunTime).append("\n");
             log.info(testRunTime);
         }
     };
+
+    @Autowired
+    private MealService service;
+
     @AfterClass
     public static void afterClass() {
         log.info("\n ----------------------------------------------- \nTESTS TIME SPENT: \n" + testSummary);
     }
-
-    @Autowired
-    private MealService service;
 
     @Test
     public void delete() {
