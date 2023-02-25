@@ -47,7 +47,7 @@ public class JpaMealRepository implements MealRepository {
     @Override
     public Meal get(int id, int userId) {
         Meal meal = em.find(Meal.class, id);
-        return isUserMeal(userId, meal) ? meal : null;
+        return meal != null && meal.getUser().getId() == userId ? meal : null;
     }
 
     @Override
@@ -64,9 +64,5 @@ public class JpaMealRepository implements MealRepository {
                 .setParameter(2, startDateTime)
                 .setParameter(3, endDateTime)
                 .getResultList();
-    }
-
-    private boolean isUserMeal(int userId, Meal meal) {
-        return meal != null && meal.getUser().getId() == userId;
     }
 }
