@@ -5,7 +5,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.javawebinar.topjava.Profiles;
-import ru.javawebinar.topjava.model.Meal;
 
 import java.time.LocalDateTime;
 
@@ -21,10 +20,5 @@ public class PostgresJdbcMealRepository extends AbstractJdbcMealRepository {
     @SuppressWarnings("unchecked")
     public LocalDateTime parseDateTime(LocalDateTime dateTime) {
         return dateTime;
-    }
-
-    @Override
-    public Meal getWithUser(int id, int userId) {
-        return null;
     }
 }
