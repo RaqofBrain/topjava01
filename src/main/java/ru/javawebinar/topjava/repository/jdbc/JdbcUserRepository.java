@@ -58,6 +58,21 @@ public class JdbcUserRepository implements UserRepository {
         return deleteRoles(user);
     }
 
+    private User deleteRoles(User user) {
+        jdbcTemplate.update("DELETE FROM user_role WHERE user_id = ?", user.id());
+        return addRoles(user);
+    }
+
+    private User addRoles(User user) {
+        Set<Role> roles = user.getRoles();
+        jdbcTemplate.batchUpdate("INSERT INTO user_role (user_id, role) VALUES (?, ?)", roles, roles.size(),
+                (pss, role) -> {
+                    pss.setInt(1, user.id());
+                    pss.setString(2, role.name());
+                });
+        return user;
+    }
+
     @Override
     @Transactional
     public boolean delete(int id) {
@@ -74,32 +89,6 @@ public class JdbcUserRepository implements UserRepository {
         return setRoles(DataAccessUtils.singleResult(jdbcTemplate.query("SELECT * FROM users WHERE email = ?", ROW_MAPPER, email)));
     }
 
-    @Override
-    public List<User> getAll() {
-        Map<Integer, Set<Role>> userRoles = new HashMap<>();
-        jdbcTemplate.query("SELECT * FROM user_role", rs -> {
-            userRoles.computeIfAbsent(rs.getInt(1), id -> new HashSet<>()).add(Role.valueOf(rs.getString(2)));
-        });
-        List<User> users = jdbcTemplate.query("SELECT * FROM users ORDER BY name, email", ROW_MAPPER);
-        users.forEach(user -> user.setRoles(userRoles.get(user.id())));
-        return users;
-    }
-
-    private User deleteRoles(User user) {
-        jdbcTemplate.update("DELETE FROM user_role WHERE user_id = ?", user.id());
-        return addRoles(user);
-    }
-
-    private User addRoles(User user) {
-        Set<Role> roles = user.getRoles();
-        jdbcTemplate.batchUpdate("INSERT INTO user_role (user_id, role) VALUES (?, ?)", roles, roles.size(),
-                (pss, role) -> {
-                    pss.setInt(1, user.id());
-                    pss.setString(2, role.name());
-                });
-        return user;
-    }
-
     private User setRoles(User user) {
         if (user != null) {
             List<Role> roles = jdbcTemplate.query("SELECT role FROM user_role WHERE user_id = ?",
@@ -107,5 +96,17 @@ public class JdbcUserRepository implements UserRepository {
             user.setRoles(roles);
         }
         return user;
+    }
+
+    @Override
+    public List<User> getAll() {
+        Map<Integer, Set<Role>> userRoles = new HashMap<>();
+        jdbcTemplate.query("SELECT * FROM user_role", rs -> {
+            userRoles.computeIfAbsent(rs.getInt(1), id -> EnumSet.noneOf(Role.class))
+                    .add(Role.valueOf(rs.getString(2)));
+        });
+        List<User> users = jdbcTemplate.query("SELECT * FROM users ORDER BY name, email", ROW_MAPPER);
+        users.forEach(user -> user.setRoles(userRoles.get(user.id())));
+        return users;
     }
 }
