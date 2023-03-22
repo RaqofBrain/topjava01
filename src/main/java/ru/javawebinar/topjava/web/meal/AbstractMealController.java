@@ -22,7 +22,7 @@ public abstract class AbstractMealController {
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    protected MealService service;
+    private MealService service;
 
     public Meal get(int id) {
         int userId = SecurityUtil.authUserId();

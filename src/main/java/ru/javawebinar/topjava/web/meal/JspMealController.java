@@ -31,7 +31,7 @@ public class JspMealController extends AbstractMealController {
     @GetMapping("create")
     public String create(Model model) {
         model.addAttribute("meal",
-                new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), "", 1000));
+                new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 1000));
         return "mealForm";
     }
 
@@ -66,8 +66,7 @@ public class JspMealController extends AbstractMealController {
         );
         if (StringUtils.hasLength(request.getParameter("id"))) {
             update(meal, getId(request));
-        }
-        else {
+        } else {
             create(meal);
         }
         return "redirect:/meals";
