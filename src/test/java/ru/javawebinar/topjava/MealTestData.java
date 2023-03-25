@@ -13,7 +13,7 @@ import static ru.javawebinar.topjava.util.MealsUtil.getTos;
 import static ru.javawebinar.topjava.web.SecurityUtil.authUserCaloriesPerDay;
 
 public class MealTestData {
-    public static final MatcherFactory.Matcher<Meal> MEAL_MATCHER = MatcherFactory.usingIgnoringFieldsComparator(Meal.class, "user", "excess");
+    public static final MatcherFactory.Matcher<Meal> MEAL_MATCHER = MatcherFactory.usingIgnoringFieldsComparator(Meal.class, "user");
     public static final MatcherFactory.Matcher<MealTo> MEAL_TO_MATCHER = MatcherFactory.usingIgnoringFieldsComparator(MealTo.class);
 
     public static final int NOT_FOUND = 10;

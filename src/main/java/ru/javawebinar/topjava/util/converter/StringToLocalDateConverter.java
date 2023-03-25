@@ -6,10 +6,10 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 public class StringToLocalDateConverter implements Converter<String, LocalDate> {
+    private final String DATE_PATTERN = "yyyy-MM-dd";
 
     @Override
     public LocalDate convert(String dateString) {
-        String datePattern = "yyyy-MM-dd";
-        return LocalDate.parse(dateString, DateTimeFormatter.ofPattern(datePattern));
+        return LocalDate.parse(dateString, DateTimeFormatter.ofPattern(DATE_PATTERN));
     }
 }

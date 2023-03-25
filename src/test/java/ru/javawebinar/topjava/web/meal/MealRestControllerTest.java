@@ -85,14 +85,16 @@ class MealRestControllerTest extends AbstractControllerTest {
     void getBetween() throws Exception {
         List<MealTo> expected = mealTos.stream()
                 .filter(to -> to.getDateTime().isAfter(
-                        LocalDateTime.of(2020, Month.JANUARY, 29, 23, 59, 59)))
+                        LocalDateTime.of(2020, Month.JANUARY, 30, 10, 34, 59)))
                 .filter(to -> to.getDateTime().isBefore(
-                        LocalDateTime.of(2020, Month.JANUARY, 31, 0, 0, 0)))
+                        LocalDateTime.of(2020, Month.JANUARY, 30, 22, 0, 1)))
                 .toList();
 
         perform(MockMvcRequestBuilders.get(REST_URL + "filter")
                 .param("startDate", "2020-01-30")
-                .param("endDate", "2020-01-30"))
+                .param("endDate", "2020-01-30")
+                .param("startTime", "10:35")
+                .param("endTime", "22:00"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
