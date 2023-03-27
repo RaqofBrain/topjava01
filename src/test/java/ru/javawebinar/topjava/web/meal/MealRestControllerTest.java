@@ -87,7 +87,7 @@ class MealRestControllerTest extends AbstractControllerTest {
                 .filter(to -> to.getDateTime().isAfter(
                         LocalDateTime.of(2020, Month.JANUARY, 30, 10, 34, 59)))
                 .filter(to -> to.getDateTime().isBefore(
-                        LocalDateTime.of(2020, Month.JANUARY, 30, 22, 0, 1)))
+                        LocalDateTime.of(2020, Month.JANUARY, 30, 22, 0, 0)))
                 .toList();
 
         perform(MockMvcRequestBuilders.get(REST_URL + "filter")
