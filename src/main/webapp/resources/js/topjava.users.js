@@ -57,6 +57,8 @@ function enable(id, checkBox) {
             successNoty(enabled ? "Enabled" : "Disabled");
             row.toggleClass('table-danger', !enabled);
         }).fail(function (jqXHR) {
+        $(checkBox).prop('checked', !enabled);
         failNoty("Oops! Something went wrong! Error status: " + jqXHR.status);
+
     });
 }
