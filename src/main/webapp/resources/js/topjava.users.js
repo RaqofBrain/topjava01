@@ -59,6 +59,5 @@ function enable(id, checkBox) {
         }).fail(function (jqXHR) {
         $(checkBox).prop('checked', !enabled);
         failNoty("Oops! Something went wrong! Error status: " + jqXHR.status);
-
     });
 }
