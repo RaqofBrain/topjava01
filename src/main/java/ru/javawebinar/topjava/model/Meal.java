@@ -44,8 +44,8 @@ public class Meal extends AbstractBaseEntity {
     private String description;
 
     @Column(name = "calories", nullable = false)
-    @Range(min = 10, max = 5000)
-    @NotNull
+    @Range(min = 10, max = 5000, message = "must be in range from 10 to 5000")
+    @NotNull(message = "must not be empty")
     private Integer calories;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -93,7 +93,7 @@ public class Meal extends AbstractBaseEntity {
         this.description = description;
     }
 
-    public void setCalories(int calories) {
+    public void setCalories(Integer calories) {
         this.calories = calories;
     }
 

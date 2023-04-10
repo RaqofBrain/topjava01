@@ -69,7 +69,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title" id="modalTitle"><spring:message code="meal.add"/></h4>
+                <h4 class="modal-title" id="modalTitle"></h4>
                 <button type="button" class="close" data-dismiss="modal" onclick="closeNoty()">&times;</button>
             </div>
             <div class="modal-body">
@@ -91,7 +91,7 @@
 
                     <div class="form-group">
                         <label for="calories" class="col-form-label"><spring:message code="meal.calories"/></label>
-                        <input type="number" class="form-control" id="calories" name="calories" placeholder="1000">
+                        <input type="number" class="form-control" id="calories" name="calories" placeholder="1000" value="1000">
                     </div>
                 </form>
             </div>
