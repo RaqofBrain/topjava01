@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.service.MealService;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
@@ -92,6 +94,35 @@ class MealRestControllerTest extends AbstractControllerTest {
                 .andExpectAll(
                         content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON),
                         jsonPath("$.type").value(VALIDATION_ERROR.name())
+                )
+                .andDo(print());
+    }
+
+    @Test
+    @Transactional(propagation = Propagation.NEVER)
+    void updateWithDuplicateData() throws Exception {
+        perform(MockMvcRequestBuilders.put(REST_URL + meal2.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(userHttpBasic(user))
+                .content(JsonUtil.writeValue(meal1)))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpectAll(
+                        jsonPath("$.type").value(VALIDATION_ERROR.name())
+                ).andDo(print());
+    }
+
+    @Test
+    @Transactional(propagation = Propagation.NEVER)
+    void createWithDuplicateData() throws Exception {
+        Meal duplicateMeal = new Meal(null, meal1.getDateTime(), meal1.getDescription(), meal1.getCalories());
+        perform(MockMvcRequestBuilders.post(REST_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(userHttpBasic(user))
+                .content(JsonUtil.writeValue(duplicateMeal)))
+                .andExpect(status().isConflict())
+                .andExpectAll(
+                        jsonPath("$.type").value(VALIDATION_ERROR.name()),
+                        jsonPath("$.details").value("Не могу создать запись с таким же временем и датой")
                 )
                 .andDo(print());
     }
