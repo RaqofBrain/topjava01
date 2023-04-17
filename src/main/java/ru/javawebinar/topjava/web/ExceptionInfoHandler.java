@@ -10,7 +10,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,8 +22,6 @@ import ru.javawebinar.topjava.util.exception.IllegalRequestDataException;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import static ru.javawebinar.topjava.util.exception.ErrorType.*;
@@ -49,7 +46,7 @@ public class ExceptionInfoHandler {
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     @ExceptionHandler(NotFoundException.class)
     public ErrorInfo notFoundError(HttpServletRequest req, NotFoundException e) {
-        return logAndGetErrorInfo(req, e, false, DATA_NOT_FOUND);
+        return logAndGetErrorInfo(req, e, false, DATA_NOT_FOUND, e.getMessage());
     }
 
     @ResponseStatus(HttpStatus.CONFLICT)  // 409
@@ -76,13 +73,11 @@ public class ExceptionInfoHandler {
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     @ExceptionHandler(BindException.class)
     public ErrorInfo bindingError(HttpServletRequest req, BindException e) {
-        List<String> errorMessages = new ArrayList<>();
-        for (FieldError error : e.getFieldErrors()) {
-            String localizedMsg = messageSourceAccessor.getMessage(error, LocaleContextHolder.getLocale());
-            errorMessages.add("[" + error.getField() + "] " + localizedMsg);
-        }
-
-        return logAndGetErrorInfo(req, e, false, VALIDATION_ERROR, errorMessages.toArray(new String[0]));
+        String[] errorMessages = e.getFieldErrors()
+                .stream()
+                .map(error -> String.format("[%s] %s", error.getField(), messageSourceAccessor.getMessage(error, LocaleContextHolder.getLocale())))
+                .toArray(String[]::new);
+        return logAndGetErrorInfo(req, e, false, VALIDATION_ERROR, errorMessages);
     }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
